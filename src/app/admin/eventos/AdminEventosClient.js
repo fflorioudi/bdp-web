@@ -1,0 +1,178 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { createClient } from "../../../lib/supabase/client";
+import {
+  pageStyle,
+  topBarStyle,
+  titleStyle,
+  linkStyle,
+  primaryButtonStyle,
+  messageBaseStyle,
+  successMessageStyle,
+  errorMessageStyle,
+  gridStyle,
+  cardStyle,
+  imageStyle,
+  placeholderStyle,
+  buttonsRowStyle,
+  secondaryButtonStyle,
+  dangerButtonStyle,
+} from "../../../lib/adminStyles";
+
+export default function AdminEventosClient() {
+  const supabase = createClient();
+
+  const [eventos, setEventos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [mensaje, setMensaje] = useState("");
+  const [tipoMensaje, setTipoMensaje] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
+
+  useEffect(() => {
+    cargarEventos();
+  }, []);
+
+  async function cargarEventos() {
+    setLoading(true);
+
+    const { data, error } = await supabase
+      .from("events")
+      .select("*")
+      .order("fecha", { ascending: true });
+
+    if (error) {
+      console.error("Error al cargar eventos:", error);
+      setMensaje("Hubo un error al cargar los eventos.");
+      setTipoMensaje("error");
+    } else {
+      setEventos(data || []);
+    }
+
+    setLoading(false);
+  }
+
+  async function eliminarEvento(id) {
+    const confirmar = window.confirm("¿Seguro que querés eliminar este evento?");
+    if (!confirmar) return;
+
+    setDeletingId(id);
+    setMensaje("");
+    setTipoMensaje("");
+
+    const { error } = await supabase.from("events").delete().eq("id", id);
+
+    if (error) {
+      console.error("Error al eliminar evento:", error);
+      setMensaje("Hubo un error al eliminar el evento.");
+      setTipoMensaje("error");
+    } else {
+      setMensaje("Evento eliminado correctamente.");
+      setTipoMensaje("success");
+      await cargarEventos();
+    }
+
+    setDeletingId(null);
+  }
+
+  return (
+    <main style={pageStyle}>
+      <div style={topBarStyle}>
+        <h1 style={titleStyle}>Administrar eventos</h1>
+
+        <Link href="/admin/eventos/nuevo" style={linkStyle}>
+          <button style={primaryButtonStyle}>+ Nuevo evento</button>
+        </Link>
+      </div>
+
+      {mensaje && (
+        <p
+          style={{
+            ...messageBaseStyle,
+            ...(tipoMensaje === "success" ? successMessageStyle : errorMessageStyle),
+          }}
+        >
+          {mensaje}
+        </p>
+      )}
+
+      {loading ? (
+        <p>Cargando eventos...</p>
+      ) : eventos.length === 0 ? (
+        <p>No hay eventos cargados.</p>
+      ) : (
+        <section style={gridStyle}>
+          {eventos.map((evento) => (
+            <article key={evento.id} style={cardStyle}>
+              {evento.imagen ? (
+                <img src={evento.imagen} alt={evento.titulo} style={imageStyle} />
+              ) : (
+                <div style={placeholderStyle}>Sin imagen</div>
+              )}
+
+              <h2 style={nameStyle}>{evento.titulo}</h2>
+
+              <div style={metaStyle}>
+                {evento.fecha && (
+                  <p style={metaItemStyle}>
+                    <strong>Fecha:</strong> {formatearFecha(evento.fecha)}
+                  </p>
+                )}
+                {evento.hora && (
+                  <p style={metaItemStyle}>
+                    <strong>Hora:</strong> {evento.hora}
+                  </p>
+                )}
+                {evento.lugar && (
+                  <p style={metaItemStyle}>
+                    <strong>Lugar:</strong> {evento.lugar}
+                  </p>
+                )}
+              </div>
+
+              <div style={buttonsRowStyle}>
+                <Link href={`/admin/eventos/${evento.id}`} style={linkStyle}>
+                  <button style={secondaryButtonStyle}>Editar</button>
+                </Link>
+
+                <button
+                  onClick={() => eliminarEvento(evento.id)}
+                  style={{
+                    ...dangerButtonStyle,
+                    opacity: deletingId === evento.id ? 0.7 : 1,
+                    cursor: deletingId === evento.id ? "not-allowed" : "pointer",
+                  }}
+                  disabled={deletingId === evento.id}
+                >
+                  {deletingId === evento.id ? "Eliminando..." : "Eliminar"}
+                </button>
+              </div>
+            </article>
+          ))}
+        </section>
+      )}
+    </main>
+  );
+}
+
+function formatearFecha(fecha) {
+  return new Date(`${fecha}T00:00:00`).toLocaleDateString("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
+const nameStyle = {
+  fontSize: "1.3rem",
+  marginBottom: "12px",
+};
+
+const metaStyle = {
+  marginBottom: "14px",
+};
+
+const metaItemStyle = {
+  margin: "6px 0",
+};
