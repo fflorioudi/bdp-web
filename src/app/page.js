@@ -31,7 +31,8 @@ const heroStyle = {
 
 const overlayStyle = {
   width: "100%",
-  backgroundColor: "rgba(0,0,0,0.6)",
+  background: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.7))",
+  backdropFilter: "blur(2px)",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
