@@ -1,15 +1,29 @@
-import { createClient } from "../../lib/supabase/server";
+"use client";
 
-export default async function TestimoniosPage() {
-  const supabase = await createClient();
+import { useEffect, useState } from "react";
+import { createClient } from "../../lib/supabase/client";
 
-  const { data: testimonios, error } = await supabase
-    .from("testimonials")
-    .select("*")
-    .order("id", { ascending: true });
+export default function TestimoniosPage() {
+  const supabase = createClient();
 
-  if (error) {
-    console.error("Error al cargar testimonios:", error);
+  const [testimonios, setTestimonios] = useState([]);
+  const [imagenActiva, setImagenActiva] = useState(null);
+
+  useEffect(() => {
+    cargarTestimonios();
+  }, []);
+
+  async function cargarTestimonios() {
+    const { data, error } = await supabase
+      .from("testimonials")
+      .select("*")
+      .order("id", { ascending: true });
+
+    if (error) {
+      console.error("Error al cargar testimonios:", error);
+    } else {
+      setTestimonios(data || []);
+    }
   }
 
   return (
@@ -26,11 +40,22 @@ export default async function TestimoniosPage() {
           {testimonios.map((testimonio) => (
             <article key={testimonio.id} style={cardStyle}>
               {testimonio.foto ? (
-                <img
-                  src={testimonio.foto}
-                  alt={testimonio.nombre}
-                  style={imageStyle}
-                />
+                <div
+                  style={avatarWrapperStyle}
+                  onClick={() =>
+                    setImagenActiva({
+                      src: testimonio.foto,
+                      alt: testimonio.nombre,
+                      titulo: testimonio.nombre,
+                    })
+                  }
+                >
+                  <img
+                    src={testimonio.foto}
+                    alt={testimonio.nombre}
+                    style={imageStyle}
+                  />
+                </div>
               ) : (
                 <div style={placeholderStyle}>Sin foto</div>
               )}
@@ -45,6 +70,36 @@ export default async function TestimoniosPage() {
             </article>
           ))}
         </section>
+      )}
+
+      {imagenActiva && (
+        <div
+          style={modalOverlayStyle}
+          onClick={() => setImagenActiva(null)}
+        >
+          <div
+            style={modalContentStyle}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setImagenActiva(null)}
+              style={closeButtonStyle}
+            >
+              ×
+            </button>
+
+            <img
+              src={imagenActiva.src}
+              alt={imagenActiva.alt}
+              style={modalImageStyle}
+            />
+
+            {imagenActiva.titulo && (
+              <p style={modalCaptionStyle}>{imagenActiva.titulo}</p>
+            )}
+          </div>
+        </div>
       )}
     </main>
   );
@@ -86,14 +141,24 @@ const cardStyle = {
   padding: "18px",
   boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
   textAlign: "center",
+  transition: "transform 0.2s ease, box-shadow 0.2s ease",
+};
+
+const avatarWrapperStyle = {
+  width: "120px",
+  height: "120px",
+  borderRadius: "50%",
+  overflow: "hidden",
+  margin: "0 auto 14px",
+  cursor: "pointer",
+  backgroundColor: "#8b5e3c",
 };
 
 const imageStyle = {
-  width: "120px",
-  height: "120px",
+  width: "100%",
+  height: "100%",
   objectFit: "cover",
-  borderRadius: "50%",
-  marginBottom: "14px",
+  display: "block",
 };
 
 const placeholderStyle = {
@@ -120,4 +185,48 @@ const roleStyle = {
 
 const textStyle = {
   lineHeight: 1.7,
+};
+
+const modalOverlayStyle = {
+  position: "fixed",
+  inset: 0,
+  backgroundColor: "rgba(0,0,0,0.88)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "20px",
+  zIndex: 1000,
+};
+
+const modalContentStyle = {
+  position: "relative",
+  maxWidth: "95vw",
+  maxHeight: "95vh",
+  textAlign: "center",
+};
+
+const modalImageStyle = {
+  maxWidth: "100%",
+  maxHeight: "82vh",
+  borderRadius: "12px",
+  display: "block",
+};
+
+const modalCaptionStyle = {
+  marginTop: "12px",
+  fontSize: "1.05rem",
+};
+
+const closeButtonStyle = {
+  position: "absolute",
+  top: "-10px",
+  right: "-10px",
+  width: "38px",
+  height: "38px",
+  borderRadius: "50%",
+  border: "none",
+  backgroundColor: "#5a1a14",
+  color: "#fff",
+  fontSize: "1.4rem",
+  cursor: "pointer",
 };
