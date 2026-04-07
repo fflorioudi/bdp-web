@@ -15,9 +15,7 @@ export default async function HistoriaPage() {
 
   return (
     <main style={mainStyle}>
-      <h1 style={titleStyle}>
-        {historia?.titulo || "Historia"}
-      </h1>
+      <h1 style={titleStyle}>{historia?.titulo || "Historia"}</h1>
 
       {historia?.imagen ? (
         <img
@@ -39,12 +37,12 @@ export default async function HistoriaPage() {
 const mainStyle = {
   maxWidth: "1000px",
   margin: "0 auto",
-  padding: "40px 20px",
+  padding: "48px 20px",
   color: "#e6d3b3",
 };
 
 const titleStyle = {
-  fontSize: "2.6rem",
+  fontSize: "2.8rem",
   textAlign: "center",
   marginBottom: "30px",
 };
@@ -53,20 +51,21 @@ const imageStyle = {
   width: "100%",
   maxHeight: "420px",
   objectFit: "cover",
-  borderRadius: "14px",
-  marginBottom: "24px",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
+  borderRadius: "16px",
+  marginBottom: "28px",
+  boxShadow: "0 6px 18px rgba(0,0,0,0.28)",
 };
 
 const contentBoxStyle = {
   backgroundColor: "#6f4328",
-  borderRadius: "14px",
-  padding: "28px",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
+  borderRadius: "16px",
+  padding: "30px",
+  boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
 };
 
 const contentStyle = {
-  fontSize: "1.1rem",
-  lineHeight: 1.8,
+  fontSize: "1.08rem",
+  lineHeight: 1.9,
   whiteSpace: "pre-line",
+  margin: 0,
 };
