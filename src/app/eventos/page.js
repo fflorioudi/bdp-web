@@ -1,15 +1,34 @@
-import { createClient } from "../../lib/supabase/server";
+"use client";
 
-export default async function EventosPage() {
-  const supabase = await createClient();
+import { useEffect, useState } from "react";
+import { createClient } from "../../lib/supabase/client";
 
-  const { data: eventos, error } = await supabase
-    .from("events")
-    .select("*")
-    .order("fecha", { ascending: true });
+export default function EventosPage() {
+  const supabase = createClient();
 
-  if (error) {
-    console.error("Error al cargar eventos:", error);
+  const [eventos, setEventos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [imagenActiva, setImagenActiva] = useState(null);
+
+  useEffect(() => {
+    cargarEventos();
+  }, []);
+
+  async function cargarEventos() {
+    setLoading(true);
+
+    const { data, error } = await supabase
+      .from("events")
+      .select("*")
+      .order("fecha", { ascending: true });
+
+    if (error) {
+      console.error("Error al cargar eventos:", error);
+    } else {
+      setEventos(data || []);
+    }
+
+    setLoading(false);
   }
 
   return (
@@ -19,18 +38,31 @@ export default async function EventosPage() {
         Enterate de las actividades y encuentros de BDP.
       </p>
 
-      {!eventos || eventos.length === 0 ? (
+      {loading ? (
+        <p style={emptyStyle}>Cargando eventos...</p>
+      ) : eventos.length === 0 ? (
         <p style={emptyStyle}>Todavía no hay eventos publicados.</p>
       ) : (
         <section style={gridStyle}>
           {eventos.map((evento) => (
             <article key={evento.id} style={cardStyle}>
               {evento.imagen ? (
-                <img
-                  src={evento.imagen}
-                  alt={evento.titulo}
-                  style={imageStyle}
-                />
+                <div
+                  style={imageWrapperStyle}
+                  onClick={() =>
+                    setImagenActiva({
+                      src: evento.imagen,
+                      alt: evento.titulo,
+                      titulo: evento.titulo,
+                    })
+                  }
+                >
+                  <img
+                    src={evento.imagen}
+                    alt={evento.titulo}
+                    style={imageStyle}
+                  />
+                </div>
               ) : (
                 <div style={placeholderStyle}>Sin imagen</div>
               )}
@@ -61,6 +93,36 @@ export default async function EventosPage() {
             </article>
           ))}
         </section>
+      )}
+
+      {imagenActiva && (
+        <div
+          style={modalOverlayStyle}
+          onClick={() => setImagenActiva(null)}
+        >
+          <div
+            style={modalContentStyle}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setImagenActiva(null)}
+              style={closeButtonStyle}
+            >
+              ×
+            </button>
+
+            <img
+              src={imagenActiva.src}
+              alt={imagenActiva.alt}
+              style={modalImageStyle}
+            />
+
+            {imagenActiva.titulo && (
+              <p style={modalCaptionStyle}>{imagenActiva.titulo}</p>
+            )}
+          </div>
+        </div>
       )}
     </main>
   );
@@ -95,7 +157,7 @@ const subtitleStyle = {
 
 const emptyStyle = {
   textAlign: "center",
-  fontSize: "1.1rem",
+  fontSize: "1.05rem",
 };
 
 const gridStyle = {
@@ -106,25 +168,34 @@ const gridStyle = {
 
 const cardStyle = {
   backgroundColor: "#6f4328",
-  borderRadius: "14px",
+  borderRadius: "16px",
   padding: "18px",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
+  boxShadow: "0 4px 14px rgba(0,0,0,0.28)",
+};
+
+const imageWrapperStyle = {
+  width: "100%",
+  height: "240px",
+  borderRadius: "12px",
+  overflow: "hidden",
+  backgroundColor: "#8b5e3c",
+  marginBottom: "14px",
+  cursor: "pointer",
 };
 
 const imageStyle = {
   width: "100%",
-  height: "220px",
+  height: "100%",
   objectFit: "cover",
-  borderRadius: "10px",
-  marginBottom: "14px",
+  display: "block",
 };
 
 const placeholderStyle = {
   width: "100%",
-  height: "220px",
-  borderRadius: "10px",
-  marginBottom: "14px",
+  height: "240px",
+  borderRadius: "12px",
   backgroundColor: "#8b5e3c",
+  marginBottom: "14px",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -132,7 +203,7 @@ const placeholderStyle = {
 };
 
 const cardTitleStyle = {
-  fontSize: "1.5rem",
+  fontSize: "1.45rem",
   marginBottom: "12px",
 };
 
@@ -146,4 +217,48 @@ const metaItemStyle = {
 
 const descriptionStyle = {
   lineHeight: 1.6,
+};
+
+const modalOverlayStyle = {
+  position: "fixed",
+  inset: 0,
+  backgroundColor: "rgba(0,0,0,0.88)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "20px",
+  zIndex: 1000,
+};
+
+const modalContentStyle = {
+  position: "relative",
+  maxWidth: "95vw",
+  maxHeight: "95vh",
+  textAlign: "center",
+};
+
+const modalImageStyle = {
+  maxWidth: "100%",
+  maxHeight: "82vh",
+  borderRadius: "12px",
+  display: "block",
+};
+
+const modalCaptionStyle = {
+  marginTop: "12px",
+  fontSize: "1.05rem",
+};
+
+const closeButtonStyle = {
+  position: "absolute",
+  top: "-10px",
+  right: "-10px",
+  width: "38px",
+  height: "38px",
+  borderRadius: "50%",
+  border: "none",
+  backgroundColor: "#5a1a14",
+  color: "#fff",
+  fontSize: "1.4rem",
+  cursor: "pointer",
 };
