@@ -55,10 +55,17 @@ export default function GaleriaPage() {
         </section>
       )}
 
-      {/* MODAL */}
       {imagenActiva && (
         <div style={modalOverlayStyle} onClick={() => setImagenActiva(null)}>
-          <div style={modalContentStyle}>
+          <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              onClick={() => setImagenActiva(null)}
+              style={closeButtonStyle}
+            >
+              ×
+            </button>
+
             <img
               src={imagenActiva.imagen}
               alt={imagenActiva.titulo}
@@ -78,19 +85,20 @@ export default function GaleriaPage() {
 const mainStyle = {
   maxWidth: "1200px",
   margin: "0 auto",
-  padding: "40px 20px",
+  padding: "48px 20px",
   color: "#e6d3b3",
 };
 
 const titleStyle = {
-  fontSize: "2.6rem",
+  fontSize: "2.8rem",
   textAlign: "center",
   marginBottom: "10px",
 };
 
 const subtitleStyle = {
   textAlign: "center",
-  marginBottom: "30px",
+  marginBottom: "34px",
+  fontSize: "1.1rem",
 };
 
 const emptyStyle = {
@@ -100,22 +108,23 @@ const emptyStyle = {
 const gridStyle = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-  gap: "24px",
+  gap: "26px",
 };
 
 const cardStyle = {
   backgroundColor: "#6f4328",
-  borderRadius: "14px",
+  borderRadius: "16px",
   padding: "14px",
+  boxShadow: "0 6px 18px rgba(0,0,0,0.24)",
   cursor: "pointer",
-  transition: "transform 0.2s",
 };
 
 const imageWrapperStyle = {
   width: "100%",
   height: "260px",
-  borderRadius: "10px",
+  borderRadius: "12px",
   overflow: "hidden",
+  backgroundColor: "#8b5e3c",
 };
 
 const imageStyle = {
@@ -127,38 +136,48 @@ const imageStyle = {
 const captionStyle = {
   marginTop: "10px",
   textAlign: "center",
+  fontWeight: "bold",
 };
-
-//////////////////////
-// MODAL
-//////////////////////
 
 const modalOverlayStyle = {
   position: "fixed",
-  top: 0,
-  left: 0,
-  width: "100%",
-  height: "100%",
-  backgroundColor: "rgba(0,0,0,0.85)",
+  inset: 0,
+  backgroundColor: "rgba(0,0,0,0.88)",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
   zIndex: 1000,
+  padding: "20px",
 };
 
 const modalContentStyle = {
-  maxWidth: "90%",
-  maxHeight: "90%",
+  position: "relative",
+  maxWidth: "95vw",
+  maxHeight: "95vh",
   textAlign: "center",
 };
 
 const modalImageStyle = {
   maxWidth: "100%",
-  maxHeight: "80vh",
+  maxHeight: "82vh",
   borderRadius: "12px",
 };
 
 const modalCaptionStyle = {
   marginTop: "12px",
-  fontSize: "1.1rem",
+  fontSize: "1.05rem",
+};
+
+const closeButtonStyle = {
+  position: "absolute",
+  top: "-10px",
+  right: "-10px",
+  width: "38px",
+  height: "38px",
+  borderRadius: "50%",
+  border: "none",
+  backgroundColor: "#5a1a14",
+  color: "#fff",
+  fontSize: "1.4rem",
+  cursor: "pointer",
 };

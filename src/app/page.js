@@ -1,80 +1,71 @@
-export default function Home() {
+import { createClient } from "../../lib/supabase/server";
+
+export default async function HistoriaPage() {
+  const supabase = await createClient();
+
+  const { data: historia, error } = await supabase
+    .from("history")
+    .select("*")
+    .limit(1)
+    .single();
+
+  if (error) {
+    console.error("Error al cargar historia:", error);
+  }
+
   return (
-    <main style={heroStyle}>
-      <div style={overlayStyle}>
-        <div style={contentStyle}>
-          <h1 style={titleStyle}>Beato Deogracias Palacios</h1>
+    <main style={mainStyle}>
+      <h1 style={titleStyle}>{historia?.titulo || "Historia"}</h1>
 
-          <p style={subtitleStyle}>
-            “A veces el amor tiene forma de cruz”
-          </p>
+      {historia?.imagen ? (
+        <img
+          src={historia.imagen}
+          alt={historia.titulo}
+          style={imageStyle}
+        />
+      ) : null}
 
-          <div style={buttonsStyle}>
-            <a href="/historia" style={buttonStyle}>Historia</a>
-            <a href="/eventos" style={buttonStyle}>Eventos</a>
-            <a href="/miembros" style={buttonStyle}>Miembros</a>
-            <a href="/galeria" style={buttonStyle}>Galería</a>
-            <a href="/testimonios" style={buttonStyle}>Testimonios</a>
-          </div>
-        </div>
-      </div>
+      <section style={contentBoxStyle}>
+        <p style={contentStyle}>
+          {historia?.contenido || "Todavía no hay historia cargada."}
+        </p>
+      </section>
     </main>
   );
 }
 
-const heroStyle = {
-  minHeight: "calc(100vh - 80px)",
-  backgroundImage: "url('/hero.jpeg')",
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  display: "flex",
-};
-
-const overlayStyle = {
-  width: "100%",
-  background: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.72))",
-  backdropFilter: "blur(2px)",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  padding: "32px 18px",
-  boxSizing: "border-box",
-};
-
-const contentStyle = {
-  textAlign: "center",
+const mainStyle = {
+  maxWidth: "1000px",
+  margin: "0 auto",
+  padding: "48px 20px",
   color: "#e6d3b3",
-  width: "100%",
-  maxWidth: "900px",
 };
 
 const titleStyle = {
-  fontSize: "clamp(2.2rem, 7vw, 4.5rem)",
-  marginBottom: "12px",
-  lineHeight: 1.1,
-};
-
-const subtitleStyle = {
-  fontSize: "clamp(1rem, 3.5vw, 1.5rem)",
-  marginBottom: "28px",
-  fontStyle: "italic",
-  lineHeight: 1.4,
-};
-
-const buttonsStyle = {
-  display: "flex",
-  flexWrap: "wrap",
-  gap: "12px",
-  justifyContent: "center",
-};
-
-const buttonStyle = {
-  padding: "12px 18px",
-  borderRadius: "10px",
-  backgroundColor: "#8b5e3c",
-  color: "#fff",
-  textDecoration: "none",
-  fontWeight: "600",
-  minWidth: "120px",
+  fontSize: "2.8rem",
   textAlign: "center",
+  marginBottom: "30px",
+};
+
+const imageStyle = {
+  width: "100%",
+  maxHeight: "420px",
+  objectFit: "cover",
+  borderRadius: "16px",
+  marginBottom: "28px",
+  boxShadow: "0 6px 18px rgba(0,0,0,0.28)",
+};
+
+const contentBoxStyle = {
+  backgroundColor: "#6f4328",
+  borderRadius: "16px",
+  padding: "30px",
+  boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
+};
+
+const contentStyle = {
+  fontSize: "1.08rem",
+  lineHeight: 1.9,
+  whiteSpace: "pre-line",
+  margin: 0,
 };

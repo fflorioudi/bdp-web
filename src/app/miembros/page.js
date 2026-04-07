@@ -45,7 +45,7 @@ export default function MiembrosPage() {
       ) : (
         <section style={gridStyle}>
           {miembros.map((miembro) => (
-            <article key={miembro.id} style={cardStyle}>
+            <article style={cardStyle} key={miembro.id}>
               {miembro.foto ? (
                 <div
                   style={imageWrapperStyle}
@@ -57,11 +57,7 @@ export default function MiembrosPage() {
                     })
                   }
                 >
-                  <img
-                    src={miembro.foto}
-                    alt={miembro.nombre}
-                    style={imageStyle}
-                  />
+                  <img src={miembro.foto} alt={miembro.nombre} style={imageStyle} />
                 </div>
               ) : (
                 <div style={placeholderStyle}>Sin foto</div>
@@ -93,14 +89,8 @@ export default function MiembrosPage() {
       )}
 
       {imagenActiva && (
-        <div
-          style={modalOverlayStyle}
-          onClick={() => setImagenActiva(null)}
-        >
-          <div
-            style={modalContentStyle}
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div style={modalOverlayStyle} onClick={() => setImagenActiva(null)}>
+          <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
             <button
               type="button"
               onClick={() => setImagenActiva(null)}
@@ -109,11 +99,7 @@ export default function MiembrosPage() {
               ×
             </button>
 
-            <img
-              src={imagenActiva.src}
-              alt={imagenActiva.alt}
-              style={modalImageStyle}
-            />
+            <img src={imagenActiva.src} alt={imagenActiva.alt} style={modalImageStyle} />
 
             {imagenActiva.titulo && (
               <p style={modalCaptionStyle}>{imagenActiva.titulo}</p>
@@ -128,19 +114,19 @@ export default function MiembrosPage() {
 const mainStyle = {
   maxWidth: "1200px",
   margin: "0 auto",
-  padding: "40px 20px",
+  padding: "48px 20px",
   color: "#e6d3b3",
 };
 
 const titleStyle = {
-  fontSize: "2.6rem",
+  fontSize: "2.8rem",
   textAlign: "center",
   marginBottom: "10px",
 };
 
 const subtitleStyle = {
   textAlign: "center",
-  marginBottom: "30px",
+  marginBottom: "34px",
   fontSize: "1.1rem",
 };
 
@@ -152,14 +138,14 @@ const emptyStyle = {
 const gridStyle = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-  gap: "24px",
+  gap: "26px",
 };
 
 const cardStyle = {
   backgroundColor: "#6f4328",
   borderRadius: "16px",
   padding: "18px",
-  boxShadow: "0 4px 14px rgba(0,0,0,0.28)",
+  boxShadow: "0 6px 18px rgba(0,0,0,0.24)",
   transition: "transform 0.2s ease, box-shadow 0.2s ease",
 };
 

@@ -108,19 +108,19 @@ export default function TestimoniosPage() {
 const mainStyle = {
   maxWidth: "1200px",
   margin: "0 auto",
-  padding: "40px 20px",
+  padding: "48px 20px",
   color: "#e6d3b3",
 };
 
 const titleStyle = {
-  fontSize: "2.6rem",
+  fontSize: "2.8rem",
   textAlign: "center",
   marginBottom: "10px",
 };
 
 const subtitleStyle = {
   textAlign: "center",
-  marginBottom: "30px",
+  marginBottom: "34px",
   fontSize: "1.1rem",
 };
 
@@ -132,16 +132,15 @@ const emptyStyle = {
 const gridStyle = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-  gap: "24px",
+  gap: "26px",
 };
 
 const cardStyle = {
   backgroundColor: "#6f4328",
-  borderRadius: "14px",
+  borderRadius: "16px",
   padding: "18px",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
+  boxShadow: "0 6px 18px rgba(0,0,0,0.24)",
   textAlign: "center",
-  transition: "transform 0.2s ease, box-shadow 0.2s ease",
 };
 
 const avatarWrapperStyle = {

@@ -57,11 +57,7 @@ export default function EventosPage() {
                     })
                   }
                 >
-                  <img
-                    src={evento.imagen}
-                    alt={evento.titulo}
-                    style={imageStyle}
-                  />
+                  <img src={evento.imagen} alt={evento.titulo} style={imageStyle} />
                 </div>
               ) : (
                 <div style={placeholderStyle}>Sin imagen</div>
@@ -96,14 +92,8 @@ export default function EventosPage() {
       )}
 
       {imagenActiva && (
-        <div
-          style={modalOverlayStyle}
-          onClick={() => setImagenActiva(null)}
-        >
-          <div
-            style={modalContentStyle}
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div style={modalOverlayStyle} onClick={() => setImagenActiva(null)}>
+          <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
             <button
               type="button"
               onClick={() => setImagenActiva(null)}
@@ -112,11 +102,7 @@ export default function EventosPage() {
               ×
             </button>
 
-            <img
-              src={imagenActiva.src}
-              alt={imagenActiva.alt}
-              style={modalImageStyle}
-            />
+            <img src={imagenActiva.src} alt={imagenActiva.alt} style={modalImageStyle} />
 
             {imagenActiva.titulo && (
               <p style={modalCaptionStyle}>{imagenActiva.titulo}</p>
@@ -139,19 +125,19 @@ function formatearFecha(fecha) {
 const mainStyle = {
   maxWidth: "1200px",
   margin: "0 auto",
-  padding: "40px 20px",
+  padding: "48px 20px",
   color: "#e6d3b3",
 };
 
 const titleStyle = {
-  fontSize: "2.6rem",
+  fontSize: "2.8rem",
   textAlign: "center",
   marginBottom: "10px",
 };
 
 const subtitleStyle = {
   textAlign: "center",
-  marginBottom: "30px",
+  marginBottom: "34px",
   fontSize: "1.1rem",
 };
 
@@ -163,14 +149,14 @@ const emptyStyle = {
 const gridStyle = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-  gap: "24px",
+  gap: "26px",
 };
 
 const cardStyle = {
   backgroundColor: "#6f4328",
   borderRadius: "16px",
   padding: "18px",
-  boxShadow: "0 4px 14px rgba(0,0,0,0.28)",
+  boxShadow: "0 6px 18px rgba(0,0,0,0.24)",
 };
 
 const imageWrapperStyle = {

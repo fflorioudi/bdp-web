@@ -8,6 +8,7 @@ body {
   margin: 0;
   max-width: 100vw;
   overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -31,4 +32,13 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+main {
+  width: 100%;
+}
+
+article:hover {
+  transform: translateY(-4px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
