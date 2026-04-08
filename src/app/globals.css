@@ -38,7 +38,24 @@ main {
   width: 100%;
 }
 
+article {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
 article:hover {
   transform: translateY(-4px);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+nav a:hover,
+footer a:hover {
+  opacity: 0.86;
+}
+
+main a[href]:hover,
+button:hover {
+  filter: brightness(1.05);
+}
+
+main a[href]:hover {
+  transform: translateY(-1px);
 }

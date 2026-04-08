@@ -10,11 +10,11 @@ export default function Footer() {
 }
 
 const footerStyle = {
-  marginTop: "60px",
-  borderTop: "1px solid #8b5e3c",
-  backgroundColor: "#4a0700",
+  marginTop: "70px",
+  borderTop: "1px solid rgba(139, 94, 60, 0.55)",
+  background: "linear-gradient(180deg, #4a0700 0%, #3a0400 100%)",
   color: "#e6d3b3",
-  padding: "28px 20px",
+  padding: "30px 20px",
 };
 
 const innerStyle = {
@@ -26,10 +26,12 @@ const innerStyle = {
 const titleStyle = {
   margin: 0,
   fontSize: "1.2rem",
-  fontWeight: "700",
+  fontWeight: "800",
+  letterSpacing: "0.4px",
 };
 
 const textStyle = {
-  margin: "8px 0 4px",
+  margin: "8px 0 0",
   fontSize: "1rem",
+  opacity: 0.92,
 };
