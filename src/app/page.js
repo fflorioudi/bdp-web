@@ -11,10 +11,6 @@ export default function Home() {
             “A veces el amor tiene forma de cruz”
           </p>
 
-          <p style={descriptionStyle}>
-            Un espacio para compartir comunidad, encuentros, historia y vida en común.
-          </p>
-
           <div style={buttonsStyle}>
             <a href="/historia" style={buttonStyle}>Historia</a>
             <a href="/eventos" style={buttonStyle}>Eventos</a>
@@ -80,14 +76,6 @@ const subtitleStyle = {
   fontStyle: "italic",
   lineHeight: 1.4,
   textShadow: "0 2px 12px rgba(0,0,0,0.4)",
-};
-
-const descriptionStyle = {
-  maxWidth: "700px",
-  margin: "0 auto 30px",
-  fontSize: "1.05rem",
-  lineHeight: 1.7,
-  opacity: 0.96,
 };
 
 const buttonsStyle = {
