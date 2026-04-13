@@ -1,14 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
+import { createClient } from "../../../lib/supabase/client";
 import {
-  containerStyle,
-  buttonStyle,
-  inputStyle,
+  pageStyle,
+  topBarStyle,
+  titleStyle,
+  linkStyle,
+  primaryButtonStyle,
+  gridStyle,
+  cardStyle,
+  imageStyle,
+  placeholderStyle,
+  buttonsRowStyle,
+  secondaryButtonStyle,
   dangerButtonStyle,
+  hoverLiftProps,
   hoverButtonProps,
-} from "@/lib/adminStyles";
+} from "../../../lib/adminStyles";
 import MessageAlert from "../../components/admin/MessageAlert";
 
 export default function AdminEventosClient() {
@@ -16,17 +26,21 @@ export default function AdminEventosClient() {
 
   const [eventos, setEventos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [mensaje, setMensaje] = useState("");
+  const [tipoMensaje, setTipoMensaje] = useState("success");
+  const [deletingId, setDeletingId] = useState(null);
 
-  const [titulo, setTitulo] = useState("");
-  const [fecha, setFecha] = useState("");
-  const [hora, setHora] = useState("");
-  const [lugar, setLugar] = useState("");
+  useEffect(() => {
+    cargarEventos();
+  }, []);
 
-  const [message, setMessage] = useState("");
-  const [type, setType] = useState("success");
+  useEffect(() => {
+    if (!mensaje) return;
+    const timer = setTimeout(() => setMensaje(""), 2500);
+    return () => clearTimeout(timer);
+  }, [mensaje]);
 
-  // 🔄 Obtener eventos
-  const fetchEventos = async () => {
+  async function cargarEventos() {
     setLoading(true);
 
     const { data, error } = await supabase
@@ -35,138 +49,131 @@ export default function AdminEventosClient() {
       .order("fecha", { ascending: true });
 
     if (error) {
-      setType("error");
-      setMessage("Error al cargar eventos");
+      console.error("Error al cargar eventos:", error);
+      setTipoMensaje("error");
+      setMensaje("Hubo un error al cargar los eventos.");
     } else {
-      setEventos(data);
+      setEventos(data || []);
     }
 
     setLoading(false);
-  };
+  }
 
-  useEffect(() => {
-    fetchEventos();
-  }, []);
+  async function eliminarEvento(id) {
+    const confirmar = window.confirm("¿Seguro que querés eliminar este evento?");
+    if (!confirmar) return;
 
-  // ➕ Crear evento
-  const handleCreate = async (e) => {
-    e.preventDefault();
+    setDeletingId(id);
+    setMensaje("");
 
-    const { error } = await supabase.from("events").insert([
-      {
-        titulo,
-        fecha,
-        hora,
-        lugar,
-      },
-    ]);
+    const { error } = await supabase.from("events").delete().eq("id", id);
 
     if (error) {
-      setType("error");
-      setMessage("Error al crear evento");
+      console.error("Error al eliminar evento:", error);
+      setTipoMensaje("error");
+      setMensaje("Hubo un error al eliminar el evento.");
     } else {
-      setType("success");
-      setMessage("Evento creado correctamente");
-      setTitulo("");
-      setFecha("");
-      setHora("");
-      setLugar("");
-      fetchEventos();
+      setTipoMensaje("success");
+      setMensaje("Evento eliminado correctamente.");
+      await cargarEventos();
     }
-  };
 
-  // 🗑️ Eliminar evento
-  const handleDelete = async (id) => {
-    const { error } = await supabase
-      .from("events")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      setType("error");
-      setMessage("Error al eliminar evento");
-    } else {
-      setType("success");
-      setMessage("Evento eliminado");
-      fetchEventos();
-    }
-  };
+    setDeletingId(null);
+  }
 
   return (
-    <div style={containerStyle}>
-      <h1 style={{ textAlign: "center", marginBottom: "20px" }}>
-        Admin Eventos
-      </h1>
+    <main style={pageStyle}>
+      <div style={topBarStyle}>
+        <h1 style={titleStyle}>Administrar eventos</h1>
 
-      <MessageAlert type={type} message={message} />
+        <Link href="/admin/eventos/nuevo" style={linkStyle}>
+          <button style={primaryButtonStyle} {...hoverButtonProps}>
+            + Nuevo evento
+          </button>
+        </Link>
+      </div>
 
-      {/* FORM */}
-      <form onSubmit={handleCreate}>
-        <input
-          style={inputStyle}
-          placeholder="Título"
-          value={titulo}
-          onChange={(e) => setTitulo(e.target.value)}
-          required
-        />
+      <MessageAlert message={mensaje} type={tipoMensaje} />
 
-        <input
-          style={inputStyle}
-          type="date"
-          value={fecha}
-          onChange={(e) => setFecha(e.target.value)}
-        />
-
-        <input
-          style={inputStyle}
-          type="time"
-          value={hora}
-          onChange={(e) => setHora(e.target.value)}
-        />
-
-        <input
-          style={inputStyle}
-          placeholder="Lugar"
-          value={lugar}
-          onChange={(e) => setLugar(e.target.value)}
-        />
-
-        <button type="submit" style={buttonStyle} {...hoverButtonProps}>
-          Crear evento
-        </button>
-      </form>
-
-      {/* LISTA */}
       {loading ? (
-        <p>Cargando...</p>
+        <p>Cargando eventos...</p>
       ) : eventos.length === 0 ? (
-        <p>No hay eventos</p>
+        <p>No hay eventos cargados.</p>
       ) : (
-        eventos.map((evento) => (
-          <div
-            key={evento.id}
-            style={{
-              background: "#fff",
-              padding: "15px",
-              borderRadius: "10px",
-              marginTop: "10px",
-            }}
-          >
-            <h3>{evento.titulo}</h3>
-            <p>{evento.fecha}</p>
-            <p>{evento.hora}</p>
-            <p>{evento.lugar}</p>
+        <section style={gridStyle}>
+          {eventos.map((evento) => (
+            <article key={evento.id} style={cardStyle} {...hoverLiftProps}>
+              {evento.imagen ? (
+                <img src={evento.imagen} alt={evento.titulo} style={imageStyle} />
+              ) : (
+                <div style={placeholderStyle}>Sin imagen</div>
+              )}
 
-            <button
-              onClick={() => handleDelete(evento.id)}
-              style={dangerButtonStyle}
-              {...hoverButtonProps}
-            >
-              Eliminar
-            </button>
-          </div>
-        ))
+              <h2 style={nameStyle}>{evento.titulo}</h2>
+
+              <div style={metaStyle}>
+                {evento.fecha && (
+                  <p style={metaItemStyle}>
+                    <strong>Fecha:</strong> {formatearFecha(evento.fecha)}
+                  </p>
+                )}
+                {evento.hora && (
+                  <p style={metaItemStyle}>
+                    <strong>Hora:</strong> {evento.hora}
+                  </p>
+                )}
+                {evento.lugar && (
+                  <p style={metaItemStyle}>
+                    <strong>Lugar:</strong> {evento.lugar}
+                  </p>
+                )}
+              </div>
+
+              <div style={buttonsRowStyle}>
+                <Link href={`/admin/eventos/${evento.id}`} style={linkStyle}>
+                  <button style={secondaryButtonStyle} {...hoverButtonProps}>
+                    Editar
+                  </button>
+                </Link>
+
+                <button
+                  onClick={() => eliminarEvento(evento.id)}
+                  style={{
+                    ...dangerButtonStyle,
+                    opacity: deletingId === evento.id ? 0.7 : 1,
+                    cursor: deletingId === evento.id ? "not-allowed" : "pointer",
+                  }}
+                  disabled={deletingId === evento.id}
+                  {...hoverButtonProps}
+                >
+                  {deletingId === evento.id ? "Eliminando..." : "Eliminar"}
+                </button>
+              </div>
+            </article>
+          ))}
+        </section>
       )}
-    </div>
+    </main>
   );
 }
+
+function formatearFecha(fecha) {
+  return new Date(`${fecha}T00:00:00`).toLocaleDateString("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
+const nameStyle = {
+  fontSize: "1.3rem",
+  marginBottom: "12px",
+};
+
+const metaStyle = {
+  marginBottom: "14px",
+};
+
+const metaItemStyle = {
+  margin: "6px 0",
+};

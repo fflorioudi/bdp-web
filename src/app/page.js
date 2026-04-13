@@ -1,15 +1,4 @@
-import { createClient } from "../lib/supabase/server";
-
-export default async function Home() {
-  const supabase = await createClient();
-
-  const { data: eventoDestacado } = await supabase
-    .from("events")
-    .select("*")
-    .eq("destacado", true)
-    .limit(1)
-    .maybeSingle();
-
+export default function Home() {
   return (
     <main style={heroStyle}>
       <div style={overlayStyle}>
@@ -24,27 +13,6 @@ export default async function Home() {
 
           
 
-          {eventoDestacado && (
-            <div style={eventoBoxStyle}>
-              <h3 style={eventoTitleStyle}>Próximo encuentro</h3>
-              <p style={eventoMainTextStyle}>{eventoDestacado.titulo}</p>
-
-              <div style={eventoInfoStyle}>
-                {eventoDestacado.fecha ? (
-                  <p style={eventoLineStyle}>📅 {formatearFecha(eventoDestacado.fecha)}</p>
-                ) : null}
-
-                {eventoDestacado.hora ? (
-                  <p style={eventoLineStyle}>⏰ {eventoDestacado.hora}</p>
-                ) : null}
-
-                {eventoDestacado.lugar ? (
-                  <p style={eventoLineStyle}>📍 {eventoDestacado.lugar}</p>
-                ) : null}
-              </div>
-            </div>
-          )}
-
           <div style={buttonsStyle}>
             <a href="/historia" style={buttonStyle}>Historia</a>
             <a href="/eventos" style={buttonStyle}>Eventos</a>
@@ -57,14 +25,6 @@ export default async function Home() {
       </div>
     </main>
   );
-}
-
-function formatearFecha(fecha) {
-  return new Date(`${fecha}T00:00:00`).toLocaleDateString("es-AR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
 }
 
 const heroStyle = {
@@ -122,37 +82,6 @@ const subtitleStyle = {
 };
 
 
-
-const eventoBoxStyle = {
-  backgroundColor: "rgba(111, 67, 40, 0.92)",
-  borderRadius: "16px",
-  padding: "18px",
-  margin: "0 auto 28px",
-  maxWidth: "560px",
-  boxShadow: "0 6px 18px rgba(0,0,0,0.24)",
-};
-
-const eventoTitleStyle = {
-  marginTop: 0,
-  marginBottom: "10px",
-  fontSize: "1.25rem",
-};
-
-const eventoMainTextStyle = {
-  margin: "0 0 12px",
-  fontWeight: "700",
-  fontSize: "1.08rem",
-};
-
-const eventoInfoStyle = {
-  display: "flex",
-  flexDirection: "column",
-  gap: "6px",
-};
-
-const eventoLineStyle = {
-  margin: 0,
-};
 
 const buttonsStyle = {
   display: "flex",
