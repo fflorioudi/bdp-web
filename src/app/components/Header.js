@@ -75,6 +75,9 @@ export default function Header() {
           <Link href="/galeria" style={linkStyle} onClick={handleCloseMenu}>
             Galería
           </Link>
+          <Link href="/playlist" style={linkStyle} onClick={handleCloseMenu}>
+            Playlist
+          </Link>
           <Link href="/testimonios" style={linkStyle} onClick={handleCloseMenu}>
             Testimonios
           </Link>

@@ -1,4 +1,15 @@
-export default function Home() {
+import { createClient } from "../lib/supabase/server";
+
+export default async function Home() {
+  const supabase = await createClient();
+
+  const { data: evento } = await supabase
+    .from("events")
+    .select("*")
+    .order("fecha", { ascending: true })
+    .limit(1)
+    .single();
+
   return (
     <main style={heroStyle}>
       <div style={overlayStyle}>
@@ -11,17 +22,41 @@ export default function Home() {
             “A veces el amor tiene forma de cruz”
           </p>
 
+         
+
+          {evento && (
+            <div style={eventoBoxStyle}>
+              <h3 style={eventoTitleStyle}>Próximo encuentro</h3>
+              <p style={eventoMainTextStyle}>{evento.titulo}</p>
+
+              <div style={eventoInfoStyle}>
+                {evento.fecha ? <p style={eventoLineStyle}>📅 {formatearFecha(evento.fecha)}</p> : null}
+                {evento.hora ? <p style={eventoLineStyle}>⏰ {evento.hora}</p> : null}
+                {evento.lugar ? <p style={eventoLineStyle}>📍 {evento.lugar}</p> : null}
+              </div>
+            </div>
+          )}
+
           <div style={buttonsStyle}>
             <a href="/historia" style={buttonStyle}>Historia</a>
             <a href="/eventos" style={buttonStyle}>Eventos</a>
             <a href="/miembros" style={buttonStyle}>Miembros</a>
             <a href="/galeria" style={buttonStyle}>Galería</a>
+            <a href="/playlist" style={buttonStyle}>Playlist</a>
             <a href="/testimonios" style={buttonStyle}>Testimonios</a>
           </div>
         </div>
       </div>
     </main>
   );
+}
+
+function formatearFecha(fecha) {
+  return new Date(`${fecha}T00:00:00`).toLocaleDateString("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 }
 
 const heroStyle = {
@@ -76,6 +111,39 @@ const subtitleStyle = {
   fontStyle: "italic",
   lineHeight: 1.4,
   textShadow: "0 2px 12px rgba(0,0,0,0.4)",
+};
+
+
+
+const eventoBoxStyle = {
+  backgroundColor: "rgba(111, 67, 40, 0.92)",
+  borderRadius: "16px",
+  padding: "18px",
+  margin: "0 auto 28px",
+  maxWidth: "560px",
+  boxShadow: "0 6px 18px rgba(0,0,0,0.24)",
+};
+
+const eventoTitleStyle = {
+  marginTop: 0,
+  marginBottom: "10px",
+  fontSize: "1.25rem",
+};
+
+const eventoMainTextStyle = {
+  margin: "0 0 12px",
+  fontWeight: "700",
+  fontSize: "1.08rem",
+};
+
+const eventoInfoStyle = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "6px",
+};
+
+const eventoLineStyle = {
+  margin: 0,
 };
 
 const buttonsStyle = {

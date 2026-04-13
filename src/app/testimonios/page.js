@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { createClient } from "../../lib/supabase/client";
 
 export default function TestimoniosPage() {
@@ -32,6 +33,12 @@ export default function TestimoniosPage() {
       <p style={subtitleStyle}>
         Voces y experiencias que forman parte de BDP.
       </p>
+
+      <div style={topButtonRowStyle}>
+        <Link href="/testimonios/nuevo" style={publicButtonStyle}>
+          Dejar testimonio
+        </Link>
+      </div>
 
       {!testimonios || testimonios.length === 0 ? (
         <p style={emptyStyle}>Todavía no hay testimonios publicados.</p>
@@ -120,8 +127,24 @@ const titleStyle = {
 
 const subtitleStyle = {
   textAlign: "center",
-  marginBottom: "34px",
+  marginBottom: "24px",
   fontSize: "1.1rem",
+};
+
+const topButtonRowStyle = {
+  display: "flex",
+  justifyContent: "center",
+  marginBottom: "30px",
+};
+
+const publicButtonStyle = {
+  padding: "12px 18px",
+  borderRadius: "10px",
+  backgroundColor: "#8b5e3c",
+  color: "#fff",
+  textDecoration: "none",
+  fontWeight: "700",
+  boxShadow: "0 6px 16px rgba(0,0,0,0.22)",
 };
 
 const emptyStyle = {
