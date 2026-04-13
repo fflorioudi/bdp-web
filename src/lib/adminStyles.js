@@ -177,3 +177,22 @@ export const buttonsRowStyle = {
   gap: "10px",
   flexWrap: "wrap",
 };
+export const hoverLiftProps = {
+  onMouseEnter: (e) => {
+    e.currentTarget.style.transform = "translateY(-4px)";
+  },
+  onMouseLeave: (e) => {
+    e.currentTarget.style.transform = "translateY(0)";
+  },
+};
+
+export const hoverButtonProps = {
+  onMouseEnter: (e) => {
+    e.currentTarget.style.opacity = "0.9";
+    e.currentTarget.style.transform = "scale(1.03)";
+  },
+  onMouseLeave: (e) => {
+    e.currentTarget.style.opacity = "1";
+    e.currentTarget.style.transform = "scale(1)";
+  },
+};
