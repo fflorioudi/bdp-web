@@ -1,24 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { createClient } from "../../../lib/supabase/client";
+import { createClient } from "@/lib/supabase/client";
 import {
-  pageStyle,
-  topBarStyle,
-  titleStyle,
-  linkStyle,
-  primaryButtonStyle,
-  gridStyle,
-  cardStyle,
-  imageStyle,
-  placeholderStyle,
-  buttonsRowStyle,
-  secondaryButtonStyle,
+  containerStyle,
+  buttonStyle,
+  inputStyle,
   dangerButtonStyle,
-  hoverLiftProps,
   hoverButtonProps,
-} from "../../../lib/adminStyles";
+} from "@/lib/adminStyles";
 import MessageAlert from "../../components/admin/MessageAlert";
 
 export default function AdminEventosClient() {
@@ -26,22 +16,17 @@ export default function AdminEventosClient() {
 
   const [eventos, setEventos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [mensaje, setMensaje] = useState("");
-  const [tipoMensaje, setTipoMensaje] = useState("success");
-  const [deletingId, setDeletingId] = useState(null);
-  const [highlightingId, setHighlightingId] = useState(null);
 
-  useEffect(() => {
-    cargarEventos();
-  }, []);
+  const [titulo, setTitulo] = useState("");
+  const [fecha, setFecha] = useState("");
+  const [hora, setHora] = useState("");
+  const [lugar, setLugar] = useState("");
 
-  useEffect(() => {
-    if (!mensaje) return;
-    const timer = setTimeout(() => setMensaje(""), 2500);
-    return () => clearTimeout(timer);
-  }, [mensaje]);
+  const [message, setMessage] = useState("");
+  const [type, setType] = useState("success");
 
-  async function cargarEventos() {
+  // 🔄 Obtener eventos
+  const fetchEventos = async () => {
     setLoading(true);
 
     const { data, error } = await supabase
@@ -50,226 +35,138 @@ export default function AdminEventosClient() {
       .order("fecha", { ascending: true });
 
     if (error) {
-      console.error("Error al cargar eventos:", error);
-      setTipoMensaje("error");
-      setMensaje("Hubo un error al cargar los eventos.");
+      setType("error");
+      setMessage("Error al cargar eventos");
     } else {
-      setEventos(data || []);
+      setEventos(data);
     }
 
     setLoading(false);
-  }
+  };
 
-  async function eliminarEvento(id) {
-    const confirmar = window.confirm("¿Seguro que querés eliminar este evento?");
-    if (!confirmar) return;
+  useEffect(() => {
+    fetchEventos();
+  }, []);
 
-    setDeletingId(id);
-    setMensaje("");
+  // ➕ Crear evento
+  const handleCreate = async (e) => {
+    e.preventDefault();
 
-    const { error } = await supabase.from("events").delete().eq("id", id);
+    const { error } = await supabase.from("events").insert([
+      {
+        titulo,
+        fecha,
+        hora,
+        lugar,
+      },
+    ]);
 
     if (error) {
-      console.error("Error al eliminar evento:", error);
-      setTipoMensaje("error");
-      setMensaje("Hubo un error al eliminar el evento.");
+      setType("error");
+      setMessage("Error al crear evento");
     } else {
-      setTipoMensaje("success");
-      setMensaje("Evento eliminado correctamente.");
-      await cargarEventos();
+      setType("success");
+      setMessage("Evento creado correctamente");
+      setTitulo("");
+      setFecha("");
+      setHora("");
+      setLugar("");
+      fetchEventos();
     }
+  };
 
-    setDeletingId(null);
-  }
-
-  async function marcarDestacado(id, yaDestacado) {
-    setHighlightingId(id);
-    setMensaje("");
-
-    if (yaDestacado) {
-      const { error } = await supabase
-        .from("events")
-        .update({ destacado: false })
-        .eq("id", id);
-
-      if (error) {
-        console.error("Error al quitar destacado:", error);
-        setTipoMensaje("error");
-        setMensaje("No se pudo quitar el destacado.");
-      } else {
-        setTipoMensaje("success");
-        setMensaje("Se quitó el evento destacado.");
-        await cargarEventos();
-      }
-
-      setHighlightingId(null);
-      return;
-    }
-
-    const { error: resetError } = await supabase
-      .from("events")
-      .update({ destacado: false })
-      .neq("id", 0);
-
-    if (resetError) {
-      console.error("Error al resetear destacados:", resetError);
-      setTipoMensaje("error");
-      setMensaje("No se pudo actualizar el evento destacado.");
-      setHighlightingId(null);
-      return;
-    }
-
+  // 🗑️ Eliminar evento
+  const handleDelete = async (id) => {
     const { error } = await supabase
       .from("events")
-      .update({ destacado: true })
+      .delete()
       .eq("id", id);
 
     if (error) {
-      console.error("Error al marcar destacado:", error);
-      setTipoMensaje("error");
-      setMensaje("No se pudo marcar el evento como destacado.");
+      setType("error");
+      setMessage("Error al eliminar evento");
     } else {
-      setTipoMensaje("success");
-      setMensaje("Evento destacado actualizado.");
-      await cargarEventos();
+      setType("success");
+      setMessage("Evento eliminado");
+      fetchEventos();
     }
-
-    setHighlightingId(null);
-  }
+  };
 
   return (
-    <main style={pageStyle}>
-      <div style={topBarStyle}>
-        <h1 style={titleStyle}>Administrar eventos</h1>
+    <div style={containerStyle}>
+      <h1 style={{ textAlign: "center", marginBottom: "20px" }}>
+        Admin Eventos
+      </h1>
 
-        <Link href="/admin/eventos/nuevo" style={linkStyle}>
-          <button style={primaryButtonStyle} {...hoverButtonProps}>+ Nuevo evento</button>
-        </Link>
-      </div>
+      <MessageAlert type={type} message={message} />
 
-      <MessageAlert message={mensaje} type={tipoMensaje} />
+      {/* FORM */}
+      <form onSubmit={handleCreate}>
+        <input
+          style={inputStyle}
+          placeholder="Título"
+          value={titulo}
+          onChange={(e) => setTitulo(e.target.value)}
+          required
+        />
 
+        <input
+          style={inputStyle}
+          type="date"
+          value={fecha}
+          onChange={(e) => setFecha(e.target.value)}
+        />
+
+        <input
+          style={inputStyle}
+          type="time"
+          value={hora}
+          onChange={(e) => setHora(e.target.value)}
+        />
+
+        <input
+          style={inputStyle}
+          placeholder="Lugar"
+          value={lugar}
+          onChange={(e) => setLugar(e.target.value)}
+        />
+
+        <button type="submit" style={buttonStyle} {...hoverButtonProps}>
+          Crear evento
+        </button>
+      </form>
+
+      {/* LISTA */}
       {loading ? (
-        <p>Cargando eventos...</p>
+        <p>Cargando...</p>
       ) : eventos.length === 0 ? (
-        <p>No hay eventos cargados.</p>
+        <p>No hay eventos</p>
       ) : (
-        <section style={gridStyle}>
-          {eventos.map((evento) => (
-            <article key={evento.id} style={cardStyle} {...hoverLiftProps}>
-              {evento.imagen ? (
-                <img src={evento.imagen} alt={evento.titulo} style={imageStyle} />
-              ) : (
-                <div style={placeholderStyle}>Sin imagen</div>
-              )}
+        eventos.map((evento) => (
+          <div
+            key={evento.id}
+            style={{
+              background: "#fff",
+              padding: "15px",
+              borderRadius: "10px",
+              marginTop: "10px",
+            }}
+          >
+            <h3>{evento.titulo}</h3>
+            <p>{evento.fecha}</p>
+            <p>{evento.hora}</p>
+            <p>{evento.lugar}</p>
 
-              <h2 style={nameStyle}>{evento.titulo}</h2>
-
-              {evento.destacado && (
-                <p style={highlightBadgeStyle}>⭐ Evento destacado</p>
-              )}
-
-              <div style={metaStyle}>
-                {evento.fecha && (
-                  <p style={metaItemStyle}>
-                    <strong>Fecha:</strong> {formatearFecha(evento.fecha)}
-                  </p>
-                )}
-                {evento.hora && (
-                  <p style={metaItemStyle}>
-                    <strong>Hora:</strong> {evento.hora}
-                  </p>
-                )}
-                {evento.lugar && (
-                  <p style={metaItemStyle}>
-                    <strong>Lugar:</strong> {evento.lugar}
-                  </p>
-                )}
-              </div>
-
-              <div style={buttonsRowStyle}>
-                <Link href={`/admin/eventos/${evento.id}`} style={linkStyle}>
-                  <button style={secondaryButtonStyle} {...hoverButtonProps}>Editar</button>
-                </Link>
-
-                <button
-                  onClick={() => marcarDestacado(evento.id, evento.destacado)}
-                  style={{
-                    ...highlightButtonStyle,
-                    opacity: highlightingId === evento.id ? 0.7 : 1,
-                    cursor: highlightingId === evento.id ? "not-allowed" : "pointer",
-                  }}
-                  disabled={highlightingId === evento.id}
-                  {...hoverButtonProps}
-                >
-                  {highlightingId === evento.id
-                    ? "Guardando..."
-                    : evento.destacado
-                    ? "Quitar destacado"
-                    : "Destacar"}
-                </button>
-
-                <button
-                  onClick={() => eliminarEvento(evento.id)}
-                  style={{
-                    ...dangerButtonStyle,
-                    opacity: deletingId === evento.id ? 0.7 : 1,
-                    cursor: deletingId === evento.id ? "not-allowed" : "pointer",
-                  }}
-                  disabled={deletingId === evento.id}
-                  {...hoverButtonProps}
-                >
-                  {deletingId === evento.id ? "Eliminando..." : "Eliminar"}
-                </button>
-              </div>
-            </article>
-          ))}
-        </section>
+            <button
+              onClick={() => handleDelete(evento.id)}
+              style={dangerButtonStyle}
+              {...hoverButtonProps}
+            >
+              Eliminar
+            </button>
+          </div>
+        ))
       )}
-    </main>
+    </div>
   );
 }
-
-function formatearFecha(fecha) {
-  return new Date(`${fecha}T00:00:00`).toLocaleDateString("es-AR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-}
-
-const nameStyle = {
-  fontSize: "1.3rem",
-  marginBottom: "10px",
-};
-
-const metaStyle = {
-  marginBottom: "14px",
-};
-
-const metaItemStyle = {
-  margin: "6px 0",
-};
-
-const highlightBadgeStyle = {
-  display: "inline-block",
-  marginBottom: "12px",
-  padding: "6px 10px",
-  borderRadius: "999px",
-  backgroundColor: "#9a6b45",
-  color: "#fff",
-  fontWeight: "700",
-  fontSize: "0.9rem",
-};
-
-const highlightButtonStyle = {
-  padding: "10px 14px",
-  borderRadius: "10px",
-  border: "none",
-  backgroundColor: "#9a6b45",
-  color: "#fff",
-  cursor: "pointer",
-  fontSize: "0.95rem",
-  fontWeight: "600",
-  transition: "transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease",
-};

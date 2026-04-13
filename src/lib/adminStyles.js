@@ -12,6 +12,16 @@ export const pageNarrowStyle = {
   color: "#e6d3b3",
 };
 
+export const containerStyle = {
+  maxWidth: "600px",
+  margin: "40px auto",
+  padding: "25px",
+  backgroundColor: "#7a4a2c",
+  borderRadius: "15px",
+  boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
+  color: "#e6d3b3",
+};
+
 export const titleStyle = {
   fontSize: "2.4rem",
   margin: 0,
@@ -43,6 +53,7 @@ export const cardStyle = {
   borderRadius: "16px",
   padding: "22px",
   boxShadow: "0 4px 14px rgba(0,0,0,0.28)",
+  transition: "transform 0.2s ease, box-shadow 0.2s ease",
 };
 
 export const formCardStyle = {
@@ -72,7 +83,7 @@ export const primaryButtonStyle = {
   cursor: "pointer",
   fontSize: "1rem",
   fontWeight: "600",
-  transition: "0.2s ease",
+  transition: "transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease",
 };
 
 export const secondaryButtonStyle = {
@@ -84,6 +95,20 @@ export const secondaryButtonStyle = {
   cursor: "pointer",
   fontSize: "0.95rem",
   fontWeight: "600",
+  transition: "transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease",
+};
+
+export const buttonStyle = {
+  width: "100%",
+  padding: "12px",
+  borderRadius: "10px",
+  border: "none",
+  backgroundColor: "#c0392b",
+  color: "#fff",
+  fontWeight: "bold",
+  cursor: "pointer",
+  marginTop: "10px",
+  transition: "all 0.2s ease",
 };
 
 export const dangerButtonStyle = {
@@ -95,6 +120,7 @@ export const dangerButtonStyle = {
   cursor: "pointer",
   fontSize: "0.95rem",
   fontWeight: "600",
+  transition: "transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease",
 };
 
 export const logoutButtonStyle = {
@@ -106,10 +132,26 @@ export const logoutButtonStyle = {
   cursor: "pointer",
   fontSize: "1rem",
   fontWeight: "600",
+  transition: "transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease",
+};
+
+export const backButtonStyle = {
+  padding: "10px 14px",
+  borderRadius: "10px",
+  border: "none",
+  backgroundColor: "#8b5e3c",
+  color: "#fff",
+  cursor: "pointer",
+  fontSize: "0.95rem",
+  fontWeight: "600",
+  marginBottom: "16px",
+  transition: "transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease",
 };
 
 export const inputStyle = {
+  width: "100%",
   padding: "12px",
+  marginBottom: "10px",
   borderRadius: "10px",
   border: "none",
   fontSize: "1rem",
@@ -117,6 +159,7 @@ export const inputStyle = {
 };
 
 export const textareaStyle = {
+  width: "100%",
   padding: "12px",
   borderRadius: "10px",
   border: "none",
@@ -131,6 +174,7 @@ export const messageBaseStyle = {
   fontWeight: "bold",
   padding: "12px 14px",
   borderRadius: "10px",
+  transition: "opacity 0.25s ease",
 };
 
 export const successMessageStyle = {
@@ -177,22 +221,25 @@ export const buttonsRowStyle = {
   gap: "10px",
   flexWrap: "wrap",
 };
+
 export const hoverLiftProps = {
   onMouseEnter: (e) => {
     e.currentTarget.style.transform = "translateY(-4px)";
+    e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.28)";
   },
   onMouseLeave: (e) => {
     e.currentTarget.style.transform = "translateY(0)";
+    e.currentTarget.style.boxShadow = "0 4px 14px rgba(0,0,0,0.28)";
   },
 };
 
 export const hoverButtonProps = {
   onMouseEnter: (e) => {
-    e.currentTarget.style.opacity = "0.9";
     e.currentTarget.style.transform = "scale(1.03)";
+    e.currentTarget.style.opacity = "0.9";
   },
   onMouseLeave: (e) => {
-    e.currentTarget.style.opacity = "1";
     e.currentTarget.style.transform = "scale(1)";
+    e.currentTarget.style.opacity = "1";
   },
 };
