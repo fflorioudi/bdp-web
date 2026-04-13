@@ -9,9 +9,6 @@ import {
   titleStyle,
   linkStyle,
   primaryButtonStyle,
-  messageBaseStyle,
-  successMessageStyle,
-  errorMessageStyle,
   gridStyle,
   cardStyle,
   imageStyle,
@@ -19,7 +16,10 @@ import {
   buttonsRowStyle,
   secondaryButtonStyle,
   dangerButtonStyle,
+  hoverLiftProps,
+  hoverButtonProps,
 } from "../../../lib/adminStyles";
+import MessageAlert from "../../components/admin/MessageAlert";
 
 export default function AdminEventosClient() {
   const supabase = createClient();
@@ -27,12 +27,19 @@ export default function AdminEventosClient() {
   const [eventos, setEventos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mensaje, setMensaje] = useState("");
-  const [tipoMensaje, setTipoMensaje] = useState("");
+  const [tipoMensaje, setTipoMensaje] = useState("success");
   const [deletingId, setDeletingId] = useState(null);
+  const [highlightingId, setHighlightingId] = useState(null);
 
   useEffect(() => {
     cargarEventos();
   }, []);
+
+  useEffect(() => {
+    if (!mensaje) return;
+    const timer = setTimeout(() => setMensaje(""), 2500);
+    return () => clearTimeout(timer);
+  }, [mensaje]);
 
   async function cargarEventos() {
     setLoading(true);
@@ -44,8 +51,8 @@ export default function AdminEventosClient() {
 
     if (error) {
       console.error("Error al cargar eventos:", error);
-      setMensaje("Hubo un error al cargar los eventos.");
       setTipoMensaje("error");
+      setMensaje("Hubo un error al cargar los eventos.");
     } else {
       setEventos(data || []);
     }
@@ -59,21 +66,75 @@ export default function AdminEventosClient() {
 
     setDeletingId(id);
     setMensaje("");
-    setTipoMensaje("");
 
     const { error } = await supabase.from("events").delete().eq("id", id);
 
     if (error) {
       console.error("Error al eliminar evento:", error);
-      setMensaje("Hubo un error al eliminar el evento.");
       setTipoMensaje("error");
+      setMensaje("Hubo un error al eliminar el evento.");
     } else {
-      setMensaje("Evento eliminado correctamente.");
       setTipoMensaje("success");
+      setMensaje("Evento eliminado correctamente.");
       await cargarEventos();
     }
 
     setDeletingId(null);
+  }
+
+  async function marcarDestacado(id, yaDestacado) {
+    setHighlightingId(id);
+    setMensaje("");
+
+    if (yaDestacado) {
+      const { error } = await supabase
+        .from("events")
+        .update({ destacado: false })
+        .eq("id", id);
+
+      if (error) {
+        console.error("Error al quitar destacado:", error);
+        setTipoMensaje("error");
+        setMensaje("No se pudo quitar el destacado.");
+      } else {
+        setTipoMensaje("success");
+        setMensaje("Se quitó el evento destacado.");
+        await cargarEventos();
+      }
+
+      setHighlightingId(null);
+      return;
+    }
+
+    const { error: resetError } = await supabase
+      .from("events")
+      .update({ destacado: false })
+      .neq("id", 0);
+
+    if (resetError) {
+      console.error("Error al resetear destacados:", resetError);
+      setTipoMensaje("error");
+      setMensaje("No se pudo actualizar el evento destacado.");
+      setHighlightingId(null);
+      return;
+    }
+
+    const { error } = await supabase
+      .from("events")
+      .update({ destacado: true })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error al marcar destacado:", error);
+      setTipoMensaje("error");
+      setMensaje("No se pudo marcar el evento como destacado.");
+    } else {
+      setTipoMensaje("success");
+      setMensaje("Evento destacado actualizado.");
+      await cargarEventos();
+    }
+
+    setHighlightingId(null);
   }
 
   return (
@@ -82,20 +143,11 @@ export default function AdminEventosClient() {
         <h1 style={titleStyle}>Administrar eventos</h1>
 
         <Link href="/admin/eventos/nuevo" style={linkStyle}>
-          <button style={primaryButtonStyle}>+ Nuevo evento</button>
+          <button style={primaryButtonStyle} {...hoverButtonProps}>+ Nuevo evento</button>
         </Link>
       </div>
 
-      {mensaje && (
-        <p
-          style={{
-            ...messageBaseStyle,
-            ...(tipoMensaje === "success" ? successMessageStyle : errorMessageStyle),
-          }}
-        >
-          {mensaje}
-        </p>
-      )}
+      <MessageAlert message={mensaje} type={tipoMensaje} />
 
       {loading ? (
         <p>Cargando eventos...</p>
@@ -104,7 +156,7 @@ export default function AdminEventosClient() {
       ) : (
         <section style={gridStyle}>
           {eventos.map((evento) => (
-            <article key={evento.id} style={cardStyle}>
+            <article key={evento.id} style={cardStyle} {...hoverLiftProps}>
               {evento.imagen ? (
                 <img src={evento.imagen} alt={evento.titulo} style={imageStyle} />
               ) : (
@@ -112,6 +164,10 @@ export default function AdminEventosClient() {
               )}
 
               <h2 style={nameStyle}>{evento.titulo}</h2>
+
+              {evento.destacado && (
+                <p style={highlightBadgeStyle}>⭐ Evento destacado</p>
+              )}
 
               <div style={metaStyle}>
                 {evento.fecha && (
@@ -133,8 +189,25 @@ export default function AdminEventosClient() {
 
               <div style={buttonsRowStyle}>
                 <Link href={`/admin/eventos/${evento.id}`} style={linkStyle}>
-                  <button style={secondaryButtonStyle}>Editar</button>
+                  <button style={secondaryButtonStyle} {...hoverButtonProps}>Editar</button>
                 </Link>
+
+                <button
+                  onClick={() => marcarDestacado(evento.id, evento.destacado)}
+                  style={{
+                    ...highlightButtonStyle,
+                    opacity: highlightingId === evento.id ? 0.7 : 1,
+                    cursor: highlightingId === evento.id ? "not-allowed" : "pointer",
+                  }}
+                  disabled={highlightingId === evento.id}
+                  {...hoverButtonProps}
+                >
+                  {highlightingId === evento.id
+                    ? "Guardando..."
+                    : evento.destacado
+                    ? "Quitar destacado"
+                    : "Destacar"}
+                </button>
 
                 <button
                   onClick={() => eliminarEvento(evento.id)}
@@ -144,6 +217,7 @@ export default function AdminEventosClient() {
                     cursor: deletingId === evento.id ? "not-allowed" : "pointer",
                   }}
                   disabled={deletingId === evento.id}
+                  {...hoverButtonProps}
                 >
                   {deletingId === evento.id ? "Eliminando..." : "Eliminar"}
                 </button>
@@ -166,7 +240,7 @@ function formatearFecha(fecha) {
 
 const nameStyle = {
   fontSize: "1.3rem",
-  marginBottom: "12px",
+  marginBottom: "10px",
 };
 
 const metaStyle = {
@@ -175,4 +249,27 @@ const metaStyle = {
 
 const metaItemStyle = {
   margin: "6px 0",
+};
+
+const highlightBadgeStyle = {
+  display: "inline-block",
+  marginBottom: "12px",
+  padding: "6px 10px",
+  borderRadius: "999px",
+  backgroundColor: "#9a6b45",
+  color: "#fff",
+  fontWeight: "700",
+  fontSize: "0.9rem",
+};
+
+const highlightButtonStyle = {
+  padding: "10px 14px",
+  borderRadius: "10px",
+  border: "none",
+  backgroundColor: "#9a6b45",
+  color: "#fff",
+  cursor: "pointer",
+  fontSize: "0.95rem",
+  fontWeight: "600",
+  transition: "transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease",
 };

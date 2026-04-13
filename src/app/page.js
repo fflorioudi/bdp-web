@@ -3,12 +3,12 @@ import { createClient } from "../lib/supabase/server";
 export default async function Home() {
   const supabase = await createClient();
 
-  const { data: evento } = await supabase
+  const { data: eventoDestacado } = await supabase
     .from("events")
     .select("*")
-    .order("fecha", { ascending: true })
+    .eq("destacado", true)
     .limit(1)
-    .single();
+    .maybeSingle();
 
   return (
     <main style={heroStyle}>
@@ -22,17 +22,25 @@ export default async function Home() {
             “A veces el amor tiene forma de cruz”
           </p>
 
-         
+          
 
-          {evento && (
+          {eventoDestacado && (
             <div style={eventoBoxStyle}>
               <h3 style={eventoTitleStyle}>Próximo encuentro</h3>
-              <p style={eventoMainTextStyle}>{evento.titulo}</p>
+              <p style={eventoMainTextStyle}>{eventoDestacado.titulo}</p>
 
               <div style={eventoInfoStyle}>
-                {evento.fecha ? <p style={eventoLineStyle}>📅 {formatearFecha(evento.fecha)}</p> : null}
-                {evento.hora ? <p style={eventoLineStyle}>⏰ {evento.hora}</p> : null}
-                {evento.lugar ? <p style={eventoLineStyle}>📍 {evento.lugar}</p> : null}
+                {eventoDestacado.fecha ? (
+                  <p style={eventoLineStyle}>📅 {formatearFecha(eventoDestacado.fecha)}</p>
+                ) : null}
+
+                {eventoDestacado.hora ? (
+                  <p style={eventoLineStyle}>⏰ {eventoDestacado.hora}</p>
+                ) : null}
+
+                {eventoDestacado.lugar ? (
+                  <p style={eventoLineStyle}>📍 {eventoDestacado.lugar}</p>
+                ) : null}
               </div>
             </div>
           )}
