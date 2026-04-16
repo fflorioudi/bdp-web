@@ -9,15 +9,15 @@ import {
   titleStyle,
   linkStyle,
   primaryButtonStyle,
-  messageBaseStyle,
-  successMessageStyle,
-  errorMessageStyle,
   gridStyle,
   cardStyle,
   buttonsRowStyle,
   secondaryButtonStyle,
   dangerButtonStyle,
+  hoverLiftProps,
+  hoverButtonProps,
 } from "../../../lib/adminStyles";
+import MessageAlert from "../../components/admin/MessageAlert";
 
 export default function AdminTestimoniosClient() {
   const supabase = createClient();
@@ -25,12 +25,19 @@ export default function AdminTestimoniosClient() {
   const [testimonios, setTestimonios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mensaje, setMensaje] = useState("");
-  const [tipoMensaje, setTipoMensaje] = useState("");
+  const [tipoMensaje, setTipoMensaje] = useState("success");
   const [deletingId, setDeletingId] = useState(null);
+  const [approvingId, setApprovingId] = useState(null);
 
   useEffect(() => {
     cargarTestimonios();
   }, []);
+
+  useEffect(() => {
+    if (!mensaje) return;
+    const timer = setTimeout(() => setMensaje(""), 2500);
+    return () => clearTimeout(timer);
+  }, [mensaje]);
 
   async function cargarTestimonios() {
     setLoading(true);
@@ -38,12 +45,12 @@ export default function AdminTestimoniosClient() {
     const { data, error } = await supabase
       .from("testimonials")
       .select("*")
-      .order("id", { ascending: true });
+      .order("id", { ascending: false });
 
     if (error) {
       console.error("Error al cargar testimonios:", error);
-      setMensaje("Hubo un error al cargar los testimonios.");
       setTipoMensaje("error");
+      setMensaje("Hubo un error al cargar los testimonios.");
     } else {
       setTestimonios(data || []);
     }
@@ -57,7 +64,6 @@ export default function AdminTestimoniosClient() {
 
     setDeletingId(id);
     setMensaje("");
-    setTipoMensaje("");
 
     const { error } = await supabase
       .from("testimonials")
@@ -66,15 +72,41 @@ export default function AdminTestimoniosClient() {
 
     if (error) {
       console.error("Error al eliminar testimonio:", error);
-      setMensaje("Hubo un error al eliminar el testimonio.");
       setTipoMensaje("error");
+      setMensaje("Hubo un error al eliminar el testimonio.");
     } else {
-      setMensaje("Testimonio eliminado correctamente.");
       setTipoMensaje("success");
+      setMensaje("Testimonio eliminado correctamente.");
       await cargarTestimonios();
     }
 
     setDeletingId(null);
+  }
+
+  async function toggleAprobacion(id, aprobadoActual) {
+    setApprovingId(id);
+    setMensaje("");
+
+    const { error } = await supabase
+      .from("testimonials")
+      .update({ aprobado: !aprobadoActual })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error al actualizar aprobación:", error);
+      setTipoMensaje("error");
+      setMensaje("No se pudo actualizar la aprobación.");
+    } else {
+      setTipoMensaje("success");
+      setMensaje(
+        aprobadoActual
+          ? "Se quitó la aprobación del testimonio."
+          : "Testimonio aprobado correctamente."
+      );
+      await cargarTestimonios();
+    }
+
+    setApprovingId(null);
   }
 
   return (
@@ -83,20 +115,13 @@ export default function AdminTestimoniosClient() {
         <h1 style={titleStyle}>Administrar testimonios</h1>
 
         <Link href="/admin/testimonios/nuevo" style={linkStyle}>
-          <button style={primaryButtonStyle}>+ Nuevo testimonio</button>
+          <button style={primaryButtonStyle} {...hoverButtonProps}>
+            + Nuevo testimonio
+          </button>
         </Link>
       </div>
 
-      {mensaje && (
-        <p
-          style={{
-            ...messageBaseStyle,
-            ...(tipoMensaje === "success" ? successMessageStyle : errorMessageStyle),
-          }}
-        >
-          {mensaje}
-        </p>
-      )}
+      <MessageAlert message={mensaje} type={tipoMensaje} />
 
       {loading ? (
         <p>Cargando testimonios...</p>
@@ -105,7 +130,7 @@ export default function AdminTestimoniosClient() {
       ) : (
         <section style={gridStyle}>
           {testimonios.map((testimonio) => (
-            <article key={testimonio.id} style={{ ...cardStyle, textAlign: "center" }}>
+            <article key={testimonio.id} style={{ ...cardStyle, textAlign: "center" }} {...hoverLiftProps}>
               {testimonio.foto ? (
                 <img src={testimonio.foto} alt={testimonio.nombre} style={avatarStyle} />
               ) : (
@@ -116,12 +141,35 @@ export default function AdminTestimoniosClient() {
 
               {testimonio.rol && <p style={roleStyle}>{testimonio.rol}</p>}
 
+              <p style={statusStyle}>
+                {testimonio.aprobado ? "✅ Aprobado" : "⏳ Pendiente"}
+              </p>
+
               <p style={textStyle}>“{testimonio.texto}”</p>
 
               <div style={{ ...buttonsRowStyle, justifyContent: "center" }}>
                 <Link href={`/admin/testimonios/${testimonio.id}`} style={linkStyle}>
-                  <button style={secondaryButtonStyle}>Editar</button>
+                  <button style={secondaryButtonStyle} {...hoverButtonProps}>
+                    Editar
+                  </button>
                 </Link>
+
+                <button
+                  onClick={() => toggleAprobacion(testimonio.id, testimonio.aprobado)}
+                  style={{
+                    ...approveButtonStyle,
+                    opacity: approvingId === testimonio.id ? 0.7 : 1,
+                    cursor: approvingId === testimonio.id ? "not-allowed" : "pointer",
+                  }}
+                  disabled={approvingId === testimonio.id}
+                  {...hoverButtonProps}
+                >
+                  {approvingId === testimonio.id
+                    ? "Guardando..."
+                    : testimonio.aprobado
+                    ? "Quitar aprobación"
+                    : "Aprobar"}
+                </button>
 
                 <button
                   onClick={() => eliminarTestimonio(testimonio.id)}
@@ -131,6 +179,7 @@ export default function AdminTestimoniosClient() {
                     cursor: deletingId === testimonio.id ? "not-allowed" : "pointer",
                   }}
                   disabled={deletingId === testimonio.id}
+                  {...hoverButtonProps}
                 >
                   {deletingId === testimonio.id ? "Eliminando..." : "Eliminar"}
                 </button>
@@ -173,7 +222,24 @@ const roleStyle = {
   fontWeight: "bold",
 };
 
+const statusStyle = {
+  marginBottom: "10px",
+  fontWeight: "700",
+};
+
 const textStyle = {
   lineHeight: 1.7,
   marginBottom: "14px",
+};
+
+const approveButtonStyle = {
+  padding: "10px 14px",
+  borderRadius: "10px",
+  border: "none",
+  backgroundColor: "#9a6b45",
+  color: "#fff",
+  cursor: "pointer",
+  fontSize: "0.95rem",
+  fontWeight: "600",
+  transition: "transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease",
 };

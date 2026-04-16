@@ -18,6 +18,7 @@ export default function TestimoniosPage() {
     const { data, error } = await supabase
       .from("testimonials")
       .select("*")
+      .eq("aprobado", true)
       .order("id", { ascending: true });
 
     if (error) {

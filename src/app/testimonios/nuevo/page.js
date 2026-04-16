@@ -10,7 +10,6 @@ export default function NuevoTestimonioPublicoPage() {
   const [nombre, setNombre] = useState("");
   const [rol, setRol] = useState("");
   const [texto, setTexto] = useState("");
-  const [fotoFile, setFotoFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState("");
   const [tipoMensaje, setTipoMensaje] = useState("success");
@@ -26,37 +25,23 @@ export default function NuevoTestimonioPublicoPage() {
     setLoading(true);
     setMensaje("");
 
-    let fotoUrl = "";
+    const nombreLimpio = nombre.trim().slice(0, 60);
+    const rolLimpio = rol.trim().slice(0, 60);
+    const textoLimpio = texto.trim().slice(0, 800);
 
-    if (fotoFile) {
-      const fileExt = fotoFile.name.split(".").pop();
-      const fileName = `${Date.now()}-${fotoFile.name.replace(/\s+/g, "-")}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("testimonials")
-        .upload(fileName, fotoFile);
-
-      if (uploadError) {
-        console.error("Error al subir foto:", uploadError);
-        setTipoMensaje("error");
-        setMensaje("Hubo un error al subir la foto.");
-        setLoading(false);
-        return;
-      }
-
-      const { data: publicUrlData } = supabase.storage
-        .from("testimonials")
-        .getPublicUrl(fileName);
-
-      fotoUrl = publicUrlData.publicUrl;
+    if (!nombreLimpio || !textoLimpio) {
+      setTipoMensaje("error");
+      setMensaje("Completá nombre y testimonio.");
+      setLoading(false);
+      return;
     }
 
     const { error } = await supabase.from("testimonials").insert([
       {
-        nombre,
-        rol,
-        texto,
-        foto: fotoUrl,
+        nombre: nombreLimpio,
+        rol: rolLimpio,
+        texto: textoLimpio,
+        aprobado: false,
       },
     ]);
 
@@ -69,11 +54,10 @@ export default function NuevoTestimonioPublicoPage() {
     }
 
     setTipoMensaje("success");
-    setMensaje("¡Tu testimonio fue enviado correctamente!");
+    setMensaje("Tu testimonio fue enviado y quedará pendiente de aprobación.");
     setNombre("");
     setRol("");
     setTexto("");
-    setFotoFile(null);
     setLoading(false);
   }
 
@@ -88,7 +72,8 @@ export default function NuevoTestimonioPublicoPage() {
 
         <h1 style={titleStyle}>Dejar testimonio</h1>
         <p style={subtitleStyle}>
-          Si querés, podés compartir tu experiencia con BDP.
+          Podés compartir tu experiencia con BDP. El testimonio quedará pendiente
+          de aprobación antes de publicarse.
         </p>
 
         <form onSubmit={handleSubmit} style={formStyle}>
@@ -98,6 +83,7 @@ export default function NuevoTestimonioPublicoPage() {
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             required
+            maxLength={60}
             style={inputStyle}
           />
 
@@ -106,6 +92,7 @@ export default function NuevoTestimonioPublicoPage() {
             placeholder="Rol o vínculo (opcional)"
             value={rol}
             onChange={(e) => setRol(e.target.value)}
+            maxLength={60}
             style={inputStyle}
           />
 
@@ -114,14 +101,8 @@ export default function NuevoTestimonioPublicoPage() {
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
             required
+            maxLength={800}
             style={textareaStyle}
-          />
-
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setFotoFile(e.target.files?.[0] || null)}
-            style={inputStyle}
           />
 
           <button type="submit" disabled={loading} style={buttonStyle}>
@@ -178,6 +159,7 @@ const subtitleStyle = {
   textAlign: "center",
   marginBottom: "24px",
   fontSize: "1.05rem",
+  lineHeight: 1.6,
 };
 
 const formStyle = {
