@@ -45,6 +45,7 @@ export default function AdminTestimoniosClient() {
     const { data, error } = await supabase
       .from("testimonials")
       .select("*")
+      .order("aprobado", {ascending: true})
       .order("id", { ascending: false });
 
     if (error) {
